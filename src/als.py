@@ -189,5 +189,5 @@ NUM4 = 100
 
 START_BUTTON = Point(27, 880)
 
-mouse(50,30)
-click(50,30)
+#mouse(50,30)
+#click(50,30)
