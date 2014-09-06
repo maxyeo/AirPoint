@@ -10,7 +10,7 @@ import os, sys, inspect, thread, time
 src_dir = os.path.dirname(inspect.getfile(inspect.currentframe()))
 arch_dir = '../lib/win/x64' if sys.maxsize > 2**32 else '../lib/win/x86'
 sys.path.insert(0, os.path.abspath(os.path.join(src_dir, arch_dir)))
-sys.path.insert(0, arch_dir)
+sys.path.insert(0,"E:\users\Eric\Documents\GitHub\ALS-Leap-Challenge\lib\win")
 
 import Leap, sys, thread, time
 from Leap import CircleGesture, KeyTapGesture, ScreenTapGesture, SwipeGesture
@@ -65,14 +65,14 @@ class SampleListener(Leap.Listener):
             xRatio = als.SCREEN_WIDTH/300
             newX = x*xRatio
             print ("x before if: " + str(newX))
-            if (newX >1920): #als.SCREEN_WIDTH
+            if (newX > als.SCREEN_WIDTH): #
                 newX = als.SCREEN_WIDTH
             elif (newX < 0 ):
                 newX = 0
                 
-            y = hand.palm_position[0] - 100
-            yRatio = als.SCREEN_HEIGHT / 200
-            newY = y * yRatio *-1
+            y = hand.palm_position[1] - 100
+            yRatio = als.SCREEN_HEIGHT / 175
+            newY = als.SCREEN_HEIGHT - y * yRatio
             if(newY > als.SCREEN_HEIGHT):
                 newY = als.SCREEN_HEIGHT
             elif (newY < 0):
