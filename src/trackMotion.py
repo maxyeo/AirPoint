@@ -10,7 +10,6 @@ import os, sys, inspect, thread, time
 src_dir = os.path.dirname(inspect.getfile(inspect.currentframe()))
 arch_dir = '../lib/win/x64' if sys.maxsize > 2**32 else '../lib/win/x86'
 sys.path.insert(0, os.path.abspath(os.path.join(src_dir, arch_dir)))
-sys.path.insert(0,"E:\users\Eric\Documents\GitHub\ALS-Leap-Challenge\lib\win")
 
 import Leap, sys, thread, time
 from Leap import CircleGesture, KeyTapGesture, ScreenTapGesture, SwipeGesture
@@ -48,8 +47,8 @@ class SampleListener(Leap.Listener):
         # Get the most recent frame and report some basic information
         frame = controller.frame()
 
-        print "Frame id: %d, timestamp: %d, hands: %d, fingers: %d, tools: %d, gestures: %d" % (
-              frame.id, frame.timestamp, len(frame.hands), len(frame.fingers), len(frame.tools), len(frame.gestures()))
+        print "Frame id: %d, timestamp: %d, hands: %d, gestures: %d" % (
+              frame.id, frame.timestamp, len(frame.hands), len(frame.gestures()))
 
         # Get hands
         for hand in frame.hands:
