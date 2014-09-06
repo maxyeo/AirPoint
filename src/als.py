@@ -178,6 +178,7 @@ UP = 38
 RIGHT = 39
 DOWN = 40
 WIN = 91
+CLICKED = False
 
 F6 = 117
 F11 = 122
@@ -189,5 +190,5 @@ NUM4 = 100
 
 START_BUTTON = Point(27, 880)
 
-#mouse(50,30)
-#click(50,30)
+mouse(50,30)
+click(50,30)

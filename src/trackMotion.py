@@ -84,6 +84,19 @@ class SampleListener(Leap.Listener):
             normal = hand.palm_normal
             direction = hand.direction
 
+            # Calculate the hands grab strength
+            strength = hand.grab_strength
+            print "Strength is: %s" %(
+                strength)
+            if (strength > .92):
+                if (als.CLICKED == False):
+                    als.click(int(newX), int(newY))
+                    als.CLICKED = True
+            else:
+                if (als.CLICKED):
+                    als.CLICKED = False
+
+
             # Calculate the hand's pitch, roll, and yaw angles
             
 #            print "  pitch: %f degrees, roll: %f degrees, yaw: %f degrees" % (
