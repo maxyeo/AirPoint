@@ -9,11 +9,17 @@
 
 For now, the demo at the bottom shows how to use it...'''
          
+import os, sys, inspect, thread, time
+src_dir = os.path.dirname(inspect.getfile(inspect.currentframe()))
+arch_dir = '../lib/win/x64' if sys.maxsize > 2**32 else '../lib/win/x86'
+sys.path.insert(0, os.path.abspath(os.path.join(src_dir, arch_dir)))
+         
 import os
 import sys
 import win32api
 import win32con
 import win32gui_struct
+import Leap
 try:
     import winxpgui as win32gui
 except ImportError:
@@ -225,18 +231,23 @@ if __name__ == '__main__':
 
     # Custom imports
     import trackMotion
-    
+    listener = trackMotion.SampleListener()
+    controller = Leap.Controller()
+
     icons = itertools.cycle(glob.glob('*.ico'))
     hover_text = "AirPoint"
     def options(sysTrayIcon): print "Options"
     def runapp(sysTrayIcon): 
-        trackMotion.run()
+        controller.add_listener(listener)
+    def stopapp(sysTrayIcon): 
+        controller.remove_listener(listener)
 
 #    def switch_icon(sysTrayIcon):
 #        sysTrayIcon.icon = icons.next()
 #        sysTrayIcon.refresh_icon()
     menu_options = (('Run', icons.next(), runapp),
-                    ('Options', icons.next(), options)
+                    ('Options', icons.next(), options),
+                    ('Stop', icons.next(), stopapp)
                    )
     def bye(sysTrayIcon): print 'Bye, then.'
     
