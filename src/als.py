@@ -69,32 +69,34 @@ def click(x, y, click=True, left=True):
         win32api.SetCursorPos((x,y))
 
 def mouse(x1, y1, click1=False, left=True, speed='fast'):
-    while True:
-        if speed == 'slow':
-            time.sleep(0.005)
-            Tspeed = 2
-        if speed == 'fast':
-            time.sleep(0.001)
-            Tspeed = 5
-        if speed == 0:
-            time.sleep(0.001)
-            Tspeed = 3
+    x = int(x1)
+    y = int(y1)
+    # while True:
+        # if speed == 'slow':
+            # time.sleep(0.005)
+            # Tspeed = 2
+        # if speed == 'fast':
+            # time.sleep(0.001)
+            # Tspeed = 5
+        # if speed == 0:
+            # time.sleep(0.001)
+            # Tspeed = 3
 
-        x = getMousePos()[0]
-        y = getMousePos()[1]
-        if abs(x-x1) < 5:
-            if abs(y-y1) < 5:
-                break
+        # x = getMousePos()[0]
+        # y = getMousePos()[1]
+        # if abs(x-x1) < 5:
+            # if abs(y-y1) < 5:
+                # break
 
-        if x1 < x:
-            x -= Tspeed
-        if x1 > x:
-            x += Tspeed
-        if y1 < y:
-            y -= Tspeed
-        if y1 > y:
-            y += Tspeed
-        click(x, y, False, False)
+        # if x1 < x:
+            # x -= Tspeed
+        # if x1 > x:
+            # x += Tspeed
+        # if y1 < y:
+            # y -= Tspeed
+        # if y1 > y:
+            # y += Tspeed
+        # click(x, y, False, False)
     if (click1 == True):
         if (left == True):
             win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN,x,y,0,0)
