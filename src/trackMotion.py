@@ -18,6 +18,12 @@ from Leap import CircleGesture, KeyTapGesture, ScreenTapGesture, SwipeGesture
 import als
 
 MIN_DISTANCE_CHANGE = 15
+MAX_FRAMES = 200
+MINIMUM_VELOCITY = .2
+X_LEAP_MOTION = 75 # in millimeters
+Y_LEAP_MOTION = 75 # in millimeters
+
+
 
 class SampleListener(Leap.Listener):
     finger_names = ['Thumb', 'Index', 'Middle', 'Ring', 'Pinky']
@@ -26,11 +32,27 @@ class SampleListener(Leap.Listener):
     
     
 
+    def getDifference(self, qArray, oldest):
+        #print (str(qArray))
+        i = oldest
+        diff = 0.0#qArray[i-1] - qArray[i]
+        geo = 2
+        for x in range(0, MAX_FRAMES-1):
+            diff = ((qArray[i-1] - qArray[i]) * -1/geo ) + diff
+            i = i - 1
+            geo = geo*2
+
+        return diff#/len(qArray)
 
     def on_init(self, controller):
         print "Initialized"
-        self.oldX = 0
-        self.oldY = 0
+        self.oldX = [0] * MAX_FRAMES
+        self.oldY = [0] * MAX_FRAMES
+        self.velocityX = [0] * MAX_FRAMES
+        self.velocityY = [0] * MAX_FRAMES
+        self.oldestFrame = MAX_FRAMES -1
+        self.currentFrame = 0
+
 
     def on_connect(self, controller):
         print "Connected"
@@ -48,91 +70,159 @@ class SampleListener(Leap.Listener):
     def on_exit(self, controller):
         print "Exited"
 
+    
     def on_frame(self, controller):
         #time.sleep(1)
         # Get the most recent frame and report some basic information
         frame = controller.frame()
-
+        if(len(frame.hands) == 0):
+            self.oldX = [0] * MAX_FRAMES
+            self.oldY = [0] * MAX_FRAMES
+            return #exit early if there are no hands
         
+            
+        hand = frame.hands.rightmost
+        #get latest data
+        #x = hand.palm_position[0] + 150
+        xRatio = als.SCREEN_WIDTH/X_LEAP_MOTION
+        yRatio = als.SCREEN_HEIGHT/Y_LEAP_MOTION
+        #newX = x*xRatio
+        leapx = hand.palm_position[0]
+        leapy = hand.palm_position[1]
+        # if(leapx > MIN_LEAP_MOTION):
+            # leapx = MIN_LEAP_MOTION
+        # elif (leapx < -MIN_LEAP_MOTION):
+            # leapx = -MIN_LEAP_MOTION
+        if (self.oldX[0] == 0):
+            self.oldX = [leapx]* MAX_FRAMES #(hand.palm_position[0] + 150) *( als.SCREEN_WIDTH/300)
+            self.oldY = [leapx]* MAX_FRAMES
+        else:
+            self.oldX[self.currentFrame] = leapx #(hand.palm_position[0] + 150) *( als.SCREEN_WIDTH/300)
+            self.oldY[self.currentFrame] = -leapy 
+        
+            
+            
+        #self.oldY[self.currentFrame] = hand.palm_position[1] #als.SCREEN_HEIGHT - (hand.palm_position[1] * (als.SCREEN_HEIGHT / 175))
+        self.velocityX[self.currentFrame] = hand.palm_velocity[0]/100
+        self.velocityY[self.currentFrame] = hand.palm_velocity[1]
 
-        # Get hands
-        for hand in frame.hands:
+        #print("x location: "+ str(hand.palm_position[0]))
+        
+        #determine the current velocity
+        velocity  = sum(self.velocityX) / MAX_FRAMES
+        mouse = als.getMousePos()
+        x = (mouse[0] ) + (self.getDifference(self.oldX,self.oldestFrame)*xRatio)# *  velocity)#sum(self.oldX) / MAX_FRAMES
+        y = (mouse[1] ) + (self.getDifference(self.oldY,self.oldestFrame)*yRatio)
+        
+        #y = sum(self.oldY) / MAX_FRAMES
+        #print (str(velocity))
+        #print ("Velocity: " + str(velocity))
+        # reset current frame
+        self.oldestFrame = self.oldestFrame + 1
+        if(self.oldestFrame == MAX_FRAMES):
+            self.oldestFrame = 0
+            
+            
+        self.currentFrame = self.currentFrame + 1
+        if(self.currentFrame == MAX_FRAMES):
+            self.currentFrame = 0
+        #update array with locations
 
-            handType = "Left hand" if hand.is_left else "Right hand"
+        # Calculate the hands grab strength
+        strength = hand.grab_strength
+        #print "Strength is: %s" %(
+        #    strength)
+        if (strength > .92):
+            if (als.CLICKED == False):
+                als.click(int(x), int(y))
+                als.CLICKED = True
+        else:
+            if (als.CLICKED):
+                als.CLICKED = False
+        
+        
+        if (x > als.SCREEN_WIDTH): #
+            x = als.SCREEN_WIDTH
+        elif (x < 0 ):
+            x = 0
+
+        if(y > als.SCREEN_HEIGHT):
+            y = als.SCREEN_HEIGHT
+        elif (y < 0):
+            y = 0
+            
+        #if (velocity > MINIMUM_VELOCITY):
+        als.mouse(x, y)
+        
+        # # Get hands
+        # for hand in frame.hands:
+
+            # handType = "Left hand" if hand.is_left else "Right hand"
+
+            # x = hand.palm_position[0]
+            # y = hand.palm_position[1]
+            
+            # # convert screen to width and height
+            # x = hand.palm_position[0] + 150
+            # xRatio = als.SCREEN_WIDTH/300
+            # newX = x*xRatio
+            # if (newX > als.SCREEN_WIDTH): #
+                # newX = als.SCREEN_WIDTH
+            # elif (newX < 0 ):
+                # newX = 0
+                
+            # y = hand.palm_position[1] - 100
+            # yRatio = als.SCREEN_HEIGHT / 175
+            # newY = als.SCREEN_HEIGHT - y * yRatio
+            # if(newY > als.SCREEN_HEIGHT):
+                # newY = als.SCREEN_HEIGHT
+            # elif (newY < 0):
+                # newY = 0
+# #            print("x: " + str(x) + " y: "+ str(y))
+# #            print ("newX: " + str(newX) + " newY: " + str(newY));
+            # if (abs(self.oldX - newX)> MIN_DISTANCE_CHANGE and abs(self.oldY - newY)> MIN_DISTANCE_CHANGE):
+                # als.mouse(newX, newY)
+                # self.oldX = newX
+                # self.oldY = newY
+                # print "Frame id: %d, timestamp: %d, hands: %d, gestures: %d" % (
+              # frame.id, frame.timestamp, len(frame.hands), len(frame.gestures()))
+                # print "  %s, id %d, position: %s" % (
+                # handType, hand.id, hand.palm_position)
+                
+            # # Get the hand's normal vector and direction
+            # normal = hand.palm_normal
+            # direction = hand.direction
 
             
 
-            # convert screen to width and height
-            x = hand.palm_position[0] + 150
-            xRatio = als.SCREEN_WIDTH/300
-            newX = x*xRatio
-            if (newX > als.SCREEN_WIDTH): #
-                newX = als.SCREEN_WIDTH
-            elif (newX < 0 ):
-                newX = 0
-                
-            y = hand.palm_position[1] - 100
-            yRatio = als.SCREEN_HEIGHT / 175
-            newY = als.SCREEN_HEIGHT - y * yRatio
-            if(newY > als.SCREEN_HEIGHT):
-                newY = als.SCREEN_HEIGHT
-            elif (newY < 0):
-                newY = 0
-#            print("x: " + str(x) + " y: "+ str(y))
-#            print ("newX: " + str(newX) + " newY: " + str(newY));
-            if (abs(self.oldX - newX)> MIN_DISTANCE_CHANGE and abs(self.oldY - newY)> MIN_DISTANCE_CHANGE):
-                als.mouse(newX, newY)
-                self.oldX = newX
-                self.oldY = newY
-                print "Frame id: %d, timestamp: %d, hands: %d, gestures: %d" % (
-              frame.id, frame.timestamp, len(frame.hands), len(frame.gestures()))
-                print "  %s, id %d, position: %s" % (
-                handType, hand.id, hand.palm_position)
-                
-            # Get the hand's normal vector and direction
-            normal = hand.palm_normal
-            direction = hand.direction
 
-            # Calculate the hands grab strength
-            strength = hand.grab_strength
-            print "Strength is: %s" %(
-                strength)
-            if (strength > .92):
-                if (als.CLICKED == False):
-                    als.click(int(newX), int(newY))
-                    als.CLICKED = True
-            else:
-                if (als.CLICKED):
-                    als.CLICKED = False
-
-
-            # Calculate the hand's pitch, roll, and yaw angles
+            # # Calculate the hand's pitch, roll, and yaw angles
             
-#            print "  pitch: %f degrees, roll: %f degrees, yaw: %f degrees" % (
-#                direction.pitch * Leap.RAD_TO_DEG,
-#                normal.roll * Leap.RAD_TO_DEG,
-#                direction.yaw * Leap.RAD_TO_DEG)
+# #            print "  pitch: %f degrees, roll: %f degrees, yaw: %f degrees" % (
+# #                direction.pitch * Leap.RAD_TO_DEG,
+# #                normal.roll * Leap.RAD_TO_DEG,
+# #                direction.yaw * Leap.RAD_TO_DEG)
 
-            # Get arm bone
-            arm = hand.arm
-#            print "  Arm direction: %s, wrist position: %s, elbow position: %s" % (
-#                arm.direction,
-#                arm.wrist_position,
-#                arm.elbow_position)
+            # # Get arm bone
+            # arm = hand.arm
+# #            print "  Arm direction: %s, wrist position: %s, elbow position: %s" % (
+# #                arm.direction,
+# #                arm.wrist_position,
+# #                arm.elbow_position)
 
-            # Get fingers
-            for finger in hand.fingers:
+            # # Get fingers
+            # for finger in hand.fingers:
 
-#                print "    %s finger, id: %d, length: %fmm, width: %fmm" % (
-#                    self.finger_names[finger.type()],
-#                    finger.id,
-#                    finger.length,
-#                    finger.width)
+# #                print "    %s finger, id: %d, length: %fmm, width: %fmm" % (
+# #                    self.finger_names[finger.type()],
+# #                    finger.id,
+# #                    finger.length,
+# #                    finger.width)
 
-                # Get bones
-                for b in range(0, 4):
-                    bone = finger.bone(b)
-#                    print "      Bone: %s, start: %s, end: %s, direction: %s" % (
+                # # Get bones
+                # for b in range(0, 4):
+                    # bone = finger.bone(b)
+# #                    print "      Bone: %s, start: %s, end: %s, direction: %s" % (
 #                        self.bone_names[bone.type],
 #                        bone.prev_joint,
 #                        bone.next_joint,
