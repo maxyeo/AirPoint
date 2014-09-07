@@ -137,10 +137,10 @@ class SampleListener(Leap.Listener):
 #        velocity  = sum(self.velocityX) / MAX_FRAMES
         mouse = als.getMousePos()
         
-        print(str(self.weightedAverage(self.oldX,self.oldestFrame)))
-        x =  (self.weightedAverage(self.oldX,self.oldestFrame) + X_LEAP_MOTION_MIN)*xRatio
+        x =  als.SCREEN_WIDTH + ((self.weightedAverage(self.oldX,self.oldestFrame) + X_LEAP_MOTION_MIN)*xRatio)
         y =  als.SCREEN_HEIGHT-  ((self.weightedAverage(self.oldY,self.oldestFrame)-(Y_LEAP_MOTION_MAX - Y_LEAP_MOTION_MIN))*yRatio) 
 
+        print x
         # reset current frame
         self.oldestFrame = self.oldestFrame + 1
         if(self.oldestFrame == MAX_FRAMES):
