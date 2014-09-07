@@ -246,7 +246,10 @@ if __name__ == '__main__':
 #        sysTrayIcon.icon = icons.next()
 #        sysTrayIcon.refresh_icon()
     menu_options = (('Run', icons, runapp),
-                    ('Options', icons, options),
+                    ('Options', icons, (('Slow', icons, options),
+                                        ('Medium', icons, options),
+                                        ('High', icons, options),
+                                        )),
                     ('Stop', icons, stopapp)
                    )
     def bye(sysTrayIcon): print 'Bye, then.'
