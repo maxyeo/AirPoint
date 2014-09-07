@@ -203,6 +203,17 @@ class SampleListener(Leap.Listener):
             y = als.SCREEN_HEIGHT
         elif (y < 0):
             y = 0
+
+	# Scrolling
+        topTen = als.SCREEN_HEIGHT * 0.25
+        bottomTen = als.SCREEN_HEIGHT - topTen
+
+        pinchStrength= hand.pinch_strength
+        print "Pinch strength is: %s" %(pinchStrength)
+        if (pinchStrength > .7 and hand.palm_position[1] >= bottomTen):
+            als.dokey(als.UP)
+        if (pinchStrength > .7 and hand.palm_position[1] < topTen):
+            als.dokey(als.DOWN)
         
  
 
