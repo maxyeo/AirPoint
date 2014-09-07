@@ -13,6 +13,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(src_dir, arch_dir)))
 
 import Leap, sys, thread, time
 from Leap import CircleGesture, KeyTapGesture, ScreenTapGesture, SwipeGesture
+import json,httplib
 
 # Custom imports
 import als
@@ -206,24 +207,42 @@ class SampleListener(Leap.Listener):
             return "STATE_INVALID"
 
 def main():
-    # Create a sample listener and controller
-    listener = SampleListener()
-    controller = Leap.Controller()
 
-    # Have the sample listener receive events from the controller
-    controller.add_listener(listener)
-
-    print (" Screen width: " + str(als.SCREEN_WIDTH))
-    print (" Screen height: " + str(als.SCREEN_HEIGHT))
-
-    # Keep this process running until Enter is pressed
-    print "Press Enter to quit..."
     try:
-        sys.stdin.readline()
-    except KeyboardInterrupt:
-        pass
+        # Create a sample listener and controller
+        listener = SampleListener()
+        controller = Leap.Controller()
+
+        # Have the sample listener receive events from the controller
+        controller.add_listener(listener)
+
+        
+        connection = httplib.HTTPSConnection('api.parse.com', 443)
+        connection.connect()
+        connection.request('POST', '/1/events/AppOpened', json.dumps({
+        }), {
+          "X-Parse-Application-Id": "PxAVa0vycI8JxrlaHJrQtzExiQYSekWPpcSZfzAo",
+          "X-Parse-REST-API-Key": "JfoBw0Q4pz8LSVjytME1OckCU0afUfT1TEptr2iE",
+          "Content-Type": "application/json"
+        })
+        # Keep this process running until Enter is pressed
+        print "Press Enter to quit..."
+    
+        raw_input()
+
+    except:
+        connection.connect()
+        connection.request('POST', '/1/functions/email', json.dumps({
+            }), {
+              "X-Parse-Application-Id": "PxAVa0vycI8JxrlaHJrQtzExiQYSekWPpcSZfzAo",
+              "X-Parse-REST-API-Key": "JfoBw0Q4pz8LSVjytME1OckCU0afUfT1TEptr2iE",
+              "Content-Type": "application/json"
+            })
+        result = json.loads(connection.getresponse().read())
+        print "Results: " + str(result)
+        
     finally:
-        # Remove the sample listener when done
+        #Remove the sample listener when done
         controller.remove_listener(listener)
 
 

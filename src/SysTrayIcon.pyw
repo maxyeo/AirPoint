@@ -20,6 +20,7 @@ import win32api
 import win32con
 import win32gui_struct
 import Leap
+import json,httplib
 try:
     import winxpgui as win32gui
 except ImportError:
@@ -227,36 +228,66 @@ def non_string_iterable(obj):
 # Minimal self test. You'll need a bunch of ICO files in the current working
 # directory in order for this to work...
 if __name__ == '__main__':
-    import itertools, glob
-
-    # Custom imports
-    import trackMotion
-    listener = trackMotion.SampleListener()
-    controller = Leap.Controller()
-
-    icons = '../img/favicon.ico'
-    hover_text = "AirPoint"
-    def options(sysTrayIcon): print "Options"
-    def runapp(sysTrayIcon): 
-        controller.add_listener(listener)
-    def stopapp(sysTrayIcon): 
-        controller.remove_listener(listener)
-    def slow_speed(sysTrayIcon):
-        trackMotion.setPreviousWeight(.99)
-    def medium_speed(sysTrayIcon):
-        trackMotion.setPreviousWeight(.97)
-    def high_speed(sysTrayIcon):
-        trackMotion.setPreviousWeight(.95)
-#    def switch_icon(sysTrayIcon):
-#        sysTrayIcon.icon = icons.next()
-#        sysTrayIcon.refresh_icon()
-    menu_options = (('Run', icons, runapp),
-                    ('Options', icons, (('Slow Speed', icons, slow_speed),
-                                        ('Medium Speed', icons, medium_speed),
-                                        ('High Speed', icons, high_speed),
-                                        )),
-                    ('Stop', icons, stopapp)
-                   )
-    def bye(sysTrayIcon): print 'Bye, then.'
-    
-    SysTrayIcon(icons, hover_text, menu_options, on_quit=bye, default_menu_index=1)
+    try:
+        import itertools, glob
+        
+        # Custom imports
+        import trackMotion
+        listener = trackMotion.SampleListener()
+        controller = Leap.Controller()
+        exitedCleanly = False
+        icons = '../img/favicon.ico'
+        hover_text = "AirPoint"
+        def options(sysTrayIcon): print "Options"
+        def runapp(sysTrayIcon): 
+            connection = httplib.HTTPSConnection('api.parse.com', 443)
+            connection.connect()
+            connection.request('POST', '/1/events/AppOpened', json.dumps({
+            }), {
+              "X-Parse-Application-Id": "PxAVa0vycI8JxrlaHJrQtzExiQYSekWPpcSZfzAo",
+              "X-Parse-REST-API-Key": "JfoBw0Q4pz8LSVjytME1OckCU0afUfT1TEptr2iE",
+              "Content-Type": "application/json"
+            })
+            controller.add_listener(listener)
+        def stopapp(sysTrayIcon): 
+            controller.remove_listener(listener)
+            exitedCleanly = True
+        def slow_speed(sysTrayIcon):
+            trackMotion.setPreviousWeight(.99)
+        def medium_speed(sysTrayIcon):
+            trackMotion.setPreviousWeight(.97)
+        def high_speed(sysTrayIcon):
+            trackMotion.setPreviousWeight(.95)
+    #    def switch_icon(sysTrayIcon):
+    #        sysTrayIcon.icon = icons.next()
+    #        sysTrayIcon.refresh_icon()
+        menu_options = (('Run', icons, runapp),
+                        ('Options', icons, (('Slow Speed', icons, slow_speed),
+                                            ('Medium Speed', icons, medium_speed),
+                                            ('High Speed', icons, high_speed),
+                                            )),
+                        ('Stop', icons, stopapp)
+                       )
+        def bye(sysTrayIcon): 
+            print 'Bye, then.'
+            if(not exitedCleanly):
+                connection = httplib.HTTPSConnection('api.parse.com', 443)
+                connection.connect()
+                connection.request('POST', '/1/functions/email', json.dumps({
+                }), {
+                    "X-Parse-Application-Id": "PxAVa0vycI8JxrlaHJrQtzExiQYSekWPpcSZfzAo",
+                    "X-Parse-REST-API-Key": "JfoBw0Q4pz8LSVjytME1OckCU0afUfT1TEptr2iE",
+                    "Content-Type": "application/json"
+                })
+        
+        SysTrayIcon(icons, hover_text, menu_options, on_quit=bye, default_menu_index=1)
+    except:
+        connection = httplib.HTTPSConnection('api.parse.com', 443)
+        connection.connect()
+        connection.request('POST', '/1/functions/email', json.dumps({
+        }), {
+            "X-Parse-Application-Id": "PxAVa0vycI8JxrlaHJrQtzExiQYSekWPpcSZfzAo",
+            "X-Parse-REST-API-Key": "JfoBw0Q4pz8LSVjytME1OckCU0afUfT1TEptr2iE",
+            "Content-Type": "application/json"
+        })
+        pass
