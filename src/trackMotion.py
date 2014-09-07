@@ -135,12 +135,11 @@ class SampleListener(Leap.Listener):
         #print ("x: " + str(max(self.velocityX))) 
         #print ("y: " + str(hand.palm_velocity[1])) 
 #        velocity  = sum(self.velocityX) / MAX_FRAMES
-        mouse = als.getMousePos()
+        
         
         x =  als.SCREEN_WIDTH + ((self.weightedAverage(self.oldX,self.oldestFrame) + X_LEAP_MOTION_MIN)*xRatio)
         y =  als.SCREEN_HEIGHT-  ((self.weightedAverage(self.oldY,self.oldestFrame)-(Y_LEAP_MOTION_MAX - Y_LEAP_MOTION_MIN))*yRatio) 
 
-        print x
         # reset current frame
         self.oldestFrame = self.oldestFrame + 1
         if(self.oldestFrame == MAX_FRAMES):
@@ -180,6 +179,15 @@ class SampleListener(Leap.Listener):
         
         
         #if((self.weightedAverage(self.velocityX,self.currentVelocityFrame) > MINIMUM_VELOCITY) or (self.weightedAverage(self.velocityY,self.currentVelocityFrame) > MINIMUM_VELOCITY)):
+        
+        #slow down the movement by restricting how far the pointer can move in a single refresh
+        mouse = als.getMousePos()
+        x = (mouse[0]*39.0 + x) / 40.0
+        y = (mouse[1]*39.0 + y) / 40.0
+        #x=  x - ( mouse[0] -x) 
+        #y = mouse[1] + ((mouse[1] - y) * .25)
+        
+        
         als.mouse(x, y)
         
  
