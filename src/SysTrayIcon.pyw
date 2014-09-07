@@ -241,14 +241,19 @@ if __name__ == '__main__':
         controller.add_listener(listener)
     def stopapp(sysTrayIcon): 
         controller.remove_listener(listener)
-
+    def slow_speed(sysTrayIcon):
+        trackMotion.setPreviousWeight(.99)
+    def medium_speed(sysTrayIcon):
+        trackMotion.setPreviousWeight(.97)
+    def high_speed(sysTrayIcon):
+        trackMotion.setPreviousWeight(.95)
 #    def switch_icon(sysTrayIcon):
 #        sysTrayIcon.icon = icons.next()
 #        sysTrayIcon.refresh_icon()
     menu_options = (('Run', icons, runapp),
-                    ('Options', icons, (('Slow', icons, options),
-                                        ('Medium', icons, options),
-                                        ('High', icons, options),
+                    ('Options', icons, (('Slow Speed', icons, slow_speed),
+                                        ('Medium Speed', icons, medium_speed),
+                                        ('High Speed', icons, high_speed),
                                         )),
                     ('Stop', icons, stopapp)
                    )
