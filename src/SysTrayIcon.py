@@ -222,19 +222,21 @@ def non_string_iterable(obj):
 # directory in order for this to work...
 if __name__ == '__main__':
     import itertools, glob
+
+    # Custom imports
+    import trackMotion
     
     icons = itertools.cycle(glob.glob('*.ico'))
-    hover_text = "SysTrayIcon.py Demo"
-    def hello(sysTrayIcon): print "Hello World."
-    def simon(sysTrayIcon): print "Hello Simon."
-    def switch_icon(sysTrayIcon):
-        sysTrayIcon.icon = icons.next()
-        sysTrayIcon.refresh_icon()
-    menu_options = (('Say Hello', icons.next(), hello),
-                    ('Switch Icon', None, switch_icon),
-                    ('A sub-menu', icons.next(), (('Say Hello to Simon', icons.next(), simon),
-                                                  ('Switch Icon', icons.next(), switch_icon),
-                                                 ))
+    hover_text = "AirPoint"
+    def options(sysTrayIcon): print "Options"
+    def runapp(sysTrayIcon): 
+        trackMotion.run()
+
+#    def switch_icon(sysTrayIcon):
+#        sysTrayIcon.icon = icons.next()
+#        sysTrayIcon.refresh_icon()
+    menu_options = (('Run', icons.next(), runapp),
+                    ('Options', icons.next(), options)
                    )
     def bye(sysTrayIcon): print 'Bye, then.'
     

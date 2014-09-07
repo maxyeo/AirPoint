@@ -289,7 +289,7 @@ class SampleListener(Leap.Listener):
         if state == Leap.Gesture.STATE_INVALID:
             return "STATE_INVALID"
 
-def main():
+def run():
     # Create a sample listener and controller
     listener = SampleListener()
     listener.oldX = 0
@@ -313,5 +313,5 @@ def main():
         controller.remove_listener(listener)
 
 
-if __name__ == "__main__":
-    main()
+#if __name__ == "__main__":
+#    main()
