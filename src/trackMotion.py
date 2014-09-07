@@ -26,7 +26,8 @@ Y_LEAP_MOTION_MIN = 100.0 # in millimeters
 Y_LEAP_MOTION_MAX = 200.0 # in millimeters
 MAX_VELOCITY_FRAMES = 200
 
-
+MIN_CLENTCH_TO_CICK = .98
+MIN_CLENTCH_TO_DISABLE = .25
 
 class SampleListener(Leap.Listener):
     finger_names = ['Thumb', 'Index', 'Middle', 'Ring', 'Pinky']
@@ -67,8 +68,14 @@ class SampleListener(Leap.Listener):
         self.currentVelocityFrame = 0
         self.oldestFrame = MAX_FRAMES -1
         self.currentFrame = 0
+        
+        self.xprev = 0
+        self.yprev = 0
+        
+        self.weightprevious = .97
 
- 
+    def setPreviousWeight(value):
+        self.weightprevious = value
 
     def on_connect(self, controller):
         print "Connected"
@@ -119,9 +126,12 @@ class SampleListener(Leap.Listener):
         if (self.oldX[0] == 0):
             self.oldX = [leapx]* MAX_FRAMES #(hand.palm_position[0] + 150) *( als.SCREEN_WIDTH/300)
             self.oldY = [leapy]* MAX_FRAMES
+            self.xprev = leapx
+            self.yprev = leapy
         else:
             self.oldX[self.currentFrame] = leapx #(hand.palm_position[0] + 150) *( als.SCREEN_WIDTH/300)
             self.oldY[self.currentFrame] = leapy 
+            
         
             
             
@@ -137,8 +147,10 @@ class SampleListener(Leap.Listener):
 #        velocity  = sum(self.velocityX) / MAX_FRAMES
         
         
-        x =  als.SCREEN_WIDTH + ((self.weightedAverage(self.oldX,self.oldestFrame) + X_LEAP_MOTION_MIN)*xRatio)
-        y =  als.SCREEN_HEIGHT-  ((self.weightedAverage(self.oldY,self.oldestFrame)-(Y_LEAP_MOTION_MAX - Y_LEAP_MOTION_MIN))*yRatio) 
+        #x =  als.SCREEN_WIDTH + ((self.weightedAverage(self.oldX,self.oldestFrame) + X_LEAP_MOTION_MIN)*xRatio)
+        x =  als.SCREEN_WIDTH + ((leapx) + X_LEAP_MOTION_MIN)*xRatio
+        #y =  als.SCREEN_HEIGHT-  ((self.weightedAverage(self.oldY,self.oldestFrame)-(Y_LEAP_MOTION_MAX - Y_LEAP_MOTION_MIN))*yRatio) 
+        y =  als.SCREEN_HEIGHT-  ((leapy)-(Y_LEAP_MOTION_MAX - Y_LEAP_MOTION_MIN))*yRatio
 
         # reset current frame
         self.oldestFrame = self.oldestFrame + 1
@@ -154,10 +166,26 @@ class SampleListener(Leap.Listener):
             self.currentVelocityFrame = 0
         #update array with locations
 
+        
+
         # Calculate the hands grab strength
         strength = hand.grab_strength
 
-        if (strength > .92):
+        
+        #slow down the movement by restricting how far the pointer can move in a single refresh
+        mouse = als.getMousePos()
+        
+        x = (mouse[0]*self.weightprevious) + x*(1.0 - self.weightprevious)# / 40.0
+        
+        y = (mouse[1] *self.weightprevious) + y *(1.0 - self.weightprevious) #/ 40.0
+        
+
+        if( strength < MIN_CLENTCH_TO_DISABLE):
+            als.mouse(x, y)
+
+        
+        
+        if (strength > MIN_CLENTCH_TO_CICK):
             if (als.CLICKED == False):
                 als.click(int(x), int(y))
                 als.CLICKED = True
@@ -175,20 +203,6 @@ class SampleListener(Leap.Listener):
             y = als.SCREEN_HEIGHT
         elif (y < 0):
             y = 0
-
-        
-        
-        #if((self.weightedAverage(self.velocityX,self.currentVelocityFrame) > MINIMUM_VELOCITY) or (self.weightedAverage(self.velocityY,self.currentVelocityFrame) > MINIMUM_VELOCITY)):
-        
-        #slow down the movement by restricting how far the pointer can move in a single refresh
-        mouse = als.getMousePos()
-        x = (mouse[0]*39.0 + x) / 40.0
-        y = (mouse[1]*39.0 + y) / 40.0
-        #x=  x - ( mouse[0] -x) 
-        #y = mouse[1] + ((mouse[1] - y) * .25)
-        
-        
-        als.mouse(x, y)
         
  
 
