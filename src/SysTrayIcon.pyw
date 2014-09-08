@@ -270,15 +270,15 @@ if __name__ == '__main__':
                        )
         def bye(sysTrayIcon): 
             print 'Bye, then.'
-            if(not exitedCleanly):
-                connection = httplib.HTTPSConnection('api.parse.com', 443)
-                connection.connect()
-                connection.request('POST', '/1/functions/email', json.dumps({
-                }), {
-                    "X-Parse-Application-Id": "PxAVa0vycI8JxrlaHJrQtzExiQYSekWPpcSZfzAo",
-                    "X-Parse-REST-API-Key": "JfoBw0Q4pz8LSVjytME1OckCU0afUfT1TEptr2iE",
-                    "Content-Type": "application/json"
-                })
+            # if(not exitedCleanly):
+                # connection = httplib.HTTPSConnection('api.parse.com', 443)
+                # connection.connect()
+                # connection.request('POST', '/1/functions/email', json.dumps({
+                # }), {
+                    # "X-Parse-Application-Id": "PxAVa0vycI8JxrlaHJrQtzExiQYSekWPpcSZfzAo",
+                    # "X-Parse-REST-API-Key": "JfoBw0Q4pz8LSVjytME1OckCU0afUfT1TEptr2iE",
+                    # "Content-Type": "application/json"
+                # })
         
         SysTrayIcon(icons, hover_text, menu_options, on_quit=bye, default_menu_index=1)
     except:
