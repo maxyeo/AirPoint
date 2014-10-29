@@ -6,7 +6,7 @@
 # between Leap Motion and you, your company or other organization.             #
 ################################################################################
 
-import os, sys, inspect, thread, time
+import os, sys, inspect, thread, time, socket
 src_dir = os.path.dirname(inspect.getfile(inspect.currentframe()))
 arch_dir = '../lib/win/x64' if sys.maxsize > 2**32 else '../lib/win/x86'
 sys.path.insert(0, os.path.abspath(os.path.join(src_dir, arch_dir)))
@@ -216,15 +216,22 @@ def main():
         # Have the sample listener receive events from the controller
         controller.add_listener(listener)
 
-        
-        connection = httplib.HTTPSConnection('api.parse.com', 443)
-        connection.connect()
-        connection.request('POST', '/1/events/AppOpened', json.dumps({
-        }), {
-          "X-Parse-Application-Id": "PxAVa0vycI8JxrlaHJrQtzExiQYSekWPpcSZfzAo",
-          "X-Parse-REST-API-Key": "JfoBw0Q4pz8LSVjytME1OckCU0afUfT1TEptr2iE",
-          "Content-Type": "application/json"
-        })
+        try:
+            #attempt to log statistics
+            connection = httplib.HTTPSConnection('api.parse.com', 443)
+            connection.connect()
+            connection.request('POST', '/1/events/AppOpened', json.dumps({
+            }), {
+              "X-Parse-Application-Id": "PxAVa0vycI8JxrlaHJrQtzExiQYSekWPpcSZfzAo",
+              "X-Parse-REST-API-Key": "JfoBw0Q4pz8LSVjytME1OckCU0afUfT1TEptr2iE",
+              "Content-Type": "application/json"
+            })
+        except socket.gaierror:
+            print "Not connected to the internet. No statistics will be generated."
+        except e:
+            print "Unknown exception: " + type(e)
+            print e
+            print "Continuing without statistics."
         # Keep this process running until Enter is pressed
         print "Press Enter to quit..."
     

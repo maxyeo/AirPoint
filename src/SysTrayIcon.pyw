@@ -239,15 +239,23 @@ if __name__ == '__main__':
         icons = '../img/favicon.ico'
         hover_text = "AirPoint"
         def options(sysTrayIcon): print "Options"
-        def runapp(sysTrayIcon): 
-            connection = httplib.HTTPSConnection('api.parse.com', 443)
-            connection.connect()
-            connection.request('POST', '/1/events/AppOpened', json.dumps({
-            }), {
-              "X-Parse-Application-Id": "PxAVa0vycI8JxrlaHJrQtzExiQYSekWPpcSZfzAo",
-              "X-Parse-REST-API-Key": "JfoBw0Q4pz8LSVjytME1OckCU0afUfT1TEptr2iE",
-              "Content-Type": "application/json"
-            })
+        def runapp(sysTrayIcon):
+            try:
+                connection = httplib.HTTPSConnection('api.parse.com', 443)
+                connection.connect()
+                connection.request('POST', '/1/events/AppOpened', json.dumps({
+                }), {
+                  "X-Parse-Application-Id": "PxAVa0vycI8JxrlaHJrQtzExiQYSekWPpcSZfzAo",
+                  "X-Parse-REST-API-Key": "JfoBw0Q4pz8LSVjytME1OckCU0afUfT1TEptr2iE",
+                  "Content-Type": "application/json"
+                })
+            except socket.gaierror:
+                print "Not connected to the internet. No statistics will be generated."
+            except e:
+                print "Unknown exception: " + type(e)
+                print e
+                print "Continuing without statistics."
+            
             controller.add_listener(listener)
         def stopapp(sysTrayIcon): 
             controller.remove_listener(listener)
