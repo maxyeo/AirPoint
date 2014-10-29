@@ -250,12 +250,11 @@ if __name__ == '__main__':
                   "Content-Type": "application/json"
                 })
             except socket.gaierror:
-                print "Not connected to the internet. No statistics will be generated."
-            except e:
-                print "Unknown exception: " + type(e)
-                print e
-                print "Continuing without statistics."
-            
+                print ("Not connected to the internet. No statistics will be generated.")
+            except httplib.HTTPException, e:
+                print ("HTTP lib error:")
+                print (e)
+                print ("Continuing without statistics.")
             controller.add_listener(listener)
         def stopapp(sysTrayIcon): 
             controller.remove_listener(listener)
@@ -289,13 +288,21 @@ if __name__ == '__main__':
                 # })
         
         SysTrayIcon(icons, hover_text, menu_options, on_quit=bye, default_menu_index=1)
-    except:
-        connection = httplib.HTTPSConnection('api.parse.com', 443)
-        connection.connect()
-        connection.request('POST', '/1/functions/email', json.dumps({
-        }), {
-            "X-Parse-Application-Id": "PxAVa0vycI8JxrlaHJrQtzExiQYSekWPpcSZfzAo",
-            "X-Parse-REST-API-Key": "JfoBw0Q4pz8LSVjytME1OckCU0afUfT1TEptr2iE",
-            "Content-Type": "application/json"
-        })
+    except Exception as e:
+        print ("Unknown Exception:")
+        print (e)
+        try:
+            connection = httplib.HTTPSConnection('api.parse.com', 443)
+            connection.connect()
+            connection.request('POST', '/1/functions/email', json.dumps({
+            }), {
+                "X-Parse-Application-Id": "PxAVa0vycI8JxrlaHJrQtzExiQYSekWPpcSZfzAo",
+                "X-Parse-REST-API-Key": "JfoBw0Q4pz8LSVjytME1OckCU0afUfT1TEptr2iE",
+                "Content-Type": "application/json"
+            })
+        except socket.gaierror:
+            print ("Not connected to the internet. Cannot log error.")
+        except httplib.HTTPException, e:
+            print ("HTTP lib error:")
+            print (e)
         pass

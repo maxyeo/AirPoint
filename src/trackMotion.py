@@ -227,26 +227,36 @@ def main():
               "Content-Type": "application/json"
             })
         except socket.gaierror:
-            print "Not connected to the internet. No statistics will be generated."
-        except e:
-            print "Unknown exception: " + type(e)
-            print e
-            print "Continuing without statistics."
+            print ("Not connected to the internet. No statistics will be generated.")
+        except Exception as e:
+            print ("Unknown exception: ")
+            print (type(e))
+            print (e)
+            print ("Continuing without statistics.")
         # Keep this process running until Enter is pressed
         print "Press Enter to quit..."
     
         raw_input()
 
-    except:
-        connection.connect()
-        connection.request('POST', '/1/functions/email', json.dumps({
-            }), {
-              "X-Parse-Application-Id": "PxAVa0vycI8JxrlaHJrQtzExiQYSekWPpcSZfzAo",
-              "X-Parse-REST-API-Key": "JfoBw0Q4pz8LSVjytME1OckCU0afUfT1TEptr2iE",
-              "Content-Type": "application/json"
-            })
-        result = json.loads(connection.getresponse().read())
-        print "Results: " + str(result)
+    except Exception as e:
+        print ("Unknown Exception:")
+        print (e)
+        try: #attempt to log the exception
+            connection.connect()
+            connection.request('POST', '/1/functions/email', json.dumps({
+                }), {
+                  "X-Parse-Application-Id": "PxAVa0vycI8JxrlaHJrQtzExiQYSekWPpcSZfzAo",
+                  "X-Parse-REST-API-Key": "JfoBw0Q4pz8LSVjytME1OckCU0afUfT1TEptr2iE",
+                  "Content-Type": "application/json"
+                })
+            result = json.loads(connection.getresponse().read())
+            print ("Results: " + str(result))
+        except socket.gaierror:
+            print ("Not connected to the internet. Cannot log error.")
+        except httplib.HTTPException, e:
+            print ("HTTP lib error:")
+            print (e)
+        
         
     finally:
         #Remove the sample listener when done
