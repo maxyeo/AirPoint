@@ -21,10 +21,10 @@ import als
 MIN_DISTANCE_CHANGE = 15
 MAX_FRAMES = 400
 MINIMUM_VELOCITY = .3
-X_LEAP_MOTION_MAX = 125.00 # in millimeters
-X_LEAP_MOTION_MIN = -125.00 # in millimeters
-Y_LEAP_MOTION_MIN = 150.00 # in millimeters
-Y_LEAP_MOTION_MAX = 250.00 # in millimeters
+X_LEAP_MOTION_MAX = 75#125.00 # in millimeters
+X_LEAP_MOTION_MIN = -75#-125.00 # in millimeters
+Y_LEAP_MOTION_MIN = 70#150.00 # in millimeters
+Y_LEAP_MOTION_MAX = 100#250.00 # in millimeters
 MAX_VELOCITY_FRAMES = 200
 
 MIN_CLENTCH_TO_CICK = .98
@@ -66,7 +66,7 @@ class SampleListener(Leap.Listener):
         self.xprev = 0
         self.yprev = 0
         
-        self.weightprevious = .97
+        self.weightprevious = .90
 
     def setPreviousWeight(value):
         self.weightprevious = value
@@ -103,15 +103,21 @@ class SampleListener(Leap.Listener):
         xRatio = als.SCREEN_WIDTH/(X_LEAP_MOTION_MAX - X_LEAP_MOTION_MIN)
         yRatio = als.SCREEN_HEIGHT/(Y_LEAP_MOTION_MAX - Y_LEAP_MOTION_MIN)
 
-        leapx = hand.palm_position[0] 
+        arm = hand.arm
+        leapx = 0
+        leapy = 0
+        if(arm.is_valid): # The arm is almost always going to be valid
+            leapx = arm.wrist_position[0]
+            leapy = arm.wrist_position[1]
+        else:#this would only happen if we grabbed an invalid (non-existent) hand
+            leapx = hand.palm_position[0] # leaving this here for posterity sake anyway
+            leapy = hand.palm_position[1]
         
         if(leapx < X_LEAP_MOTION_MIN):
             leapx = X_LEAP_MOTION_MIN
         elif (leapx > X_LEAP_MOTION_MAX):
             leapx = X_LEAP_MOTION_MAX;
-        leapx = leapx
         
-        leapy = hand.palm_position[1]
         if(leapy < Y_LEAP_MOTION_MIN):
             leapy = Y_LEAP_MOTION_MIN
         elif(leapy> Y_LEAP_MOTION_MAX):
